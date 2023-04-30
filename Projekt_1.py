@@ -27,6 +27,19 @@ class Transformacje:
         self.sp = (self.a - self.b) / self.a
         self.e2 = (2 * self.sp - self.sp ** 2) 
         
+           
+   def hirvonen(self,X,Y,Z): #XYZ zamieniamy na flh
+        p = np.sqrt(X**2+Y**2)
+        fi = np.arctan(Z/(p*(1-self.e2)))
+        while True: #pętla
+            N=self.a/np.sqrt(1-self.e2*np.sin(fi)**2)
+            h=p/np.cos(fi)-N
+            fip=fi
+            fi=np.arctan(Z/(p*(1-self.e2*N/(N+h))))
+            if abs(fip-fi)<(0.000001/206265):
+                break
+        l=np.arctan2(Y,X) #lambda
+        return(fi,l,h)     
         
     def flh2XYZ(self,fi,l,h):
         while True:
@@ -87,9 +100,36 @@ class Transformacje:
 
 
 
+    def XYZ2neu(self,s,alfa,z,fi,l):
+            dneu=np.array([s*np.sin(z)*np.cos(alfa),
+                           s*np.sin(z)*np.sin(alfa),
+                           s*np.cos(z)])
+            R=np.array([[-np.sin(fi)*np.cos(l),-np.sin(l),np.cos(fi)*np.cos(l)],
+                        [-np.sin(fi)*np.sin(l),np.cos(l),np.cos(fi)*np.sin(l)],
+                        [ np.cos(fi),            0.     ,np.sin(fi)]])
+            return(R.T @ dneu)
 
-
-
+        
+ for xyz in dane:    
+            if trans[args.trans]=="hirvonen":
+                line = obiekt.hirvonen(xyz[0],xyz[1],xyz[2])
+                result.append(line)
+                ################## nikola dodanie wywolania modelu flh2XYZ
+            if trans[args.trans]=="flh2XYZ":
+                line = obiekt.flh2XYZ(xyz[0],xyz[1],xyz[2])
+                result.append(line)
+                ##################### ja dodanie wywolania modelu pl1992
+            if trans[args.trans]=="pl1992":
+                line = obiekt.pl1992(xyz[0],xyz[1])
+                result.append(line)
+                ############### Ala dodanie wywolania modelu pl2000
+            if trans[args.trans]=="pl2000":
+                line = obiekt.pl2000(xyz[0],xyz[1])
+                result.append(line)
+                ############### Nikola  dodanie wywolania modelu XYZ2neu
+            if trans[args.trans]=="XYZ2neu":
+                line = obiekt.XYZ2neu(xyz[0],xyz[1],xyz[2],xyz[3],xyz[4])
+                result.append(line)
 
 
 
